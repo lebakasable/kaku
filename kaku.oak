@@ -1,3 +1,5 @@
+const KAKU_AA_RES = 2
+
 struct Kaku_Color {
    r char
    g char
@@ -102,11 +104,17 @@ fn kaku_circle(canvas *Kaku_Canvas, cx int, cy int, r int, color Kaku_Color) {
    }
    for let y = y1, y <= y2, y += 1 {
       for let x = x1, x <= x2, x += 1 {
-         let dx = x - cx
-         let dy = y - cy
-         if dx*dx + dy*dy <= r*r {
-            kaku_color_blend(kaku_canvas_at(canvas, x, y), color)
+         let count = 0
+         for let soy = 0, soy < KAKU_AA_RES, soy += 1 {
+            for let sox = 0, sox < KAKU_AA_RES, sox += 1 {
+               let res1 = KAKU_AA_RES + 1
+               let dx = x*res1*2 + 2 + sox*2 - res1*cx*2 - res1
+               let dy = y*res1*2 + 2 + soy*2 - res1*cy*2 - res1
+               if dx*dx + dy*dy <= res1*res1*r*r*2*2 { count += 1 }
+            }
          }
+         let alpha = color.a as int*count/KAKU_AA_RES/KAKU_AA_RES
+         kaku_color_blend(kaku_canvas_at(canvas, x, y), kaku_color_with_alpha(color, alpha))
       }
    }
 }

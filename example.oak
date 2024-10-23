@@ -3,8 +3,8 @@ use kaku
 
 const WIDTH = 512
 const HEIGHT = 512
-const COLS = 16
-const ROWS = 16
+const COLS = 8
+const ROWS = 8
 const CELL_WIDTH = WIDTH/COLS
 const CELL_HEIGHT = HEIGHT/ROWS
 
