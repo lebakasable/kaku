@@ -32,12 +32,20 @@ fn kaku_fill(canvas *Kaku_Canvas, color Kaku_Color) {
    }
 }
 
-fn kaku_fill_rect(canvas *Kaku_Canvas, x int, y int, w int, h int, color Kaku_Color) {
-   for let dy = 0, dy < h, dy += 1 {
-      let y = y + dy
+fn kaku_swap_int(a *int, b *int) {
+   let t = *a
+   *a = *b
+   *b = t
+}
+
+fn kaku_fill_rect(canvas *Kaku_Canvas, x1 int, y1 int, w int, h int, color Kaku_Color) {
+   let x2 = x1 + sign(w)*(abs(w) - 1)
+   if x1 > x2 { kaku_swap_int(&x1, &x2) }
+   let y2 = y1 + sign(h)*(abs(h) - 1)
+   if y1 > y2 { kaku_swap_int(&y1, &y2) }
+   for let y = y1, y <= y2, y += 1 {
       if 0 <= y && y < canvas.height {
-         for let dx = 0, dx < w, dx += 1 {
-            let x = x + dx
+         for let x = x1, x <= x2, x += 1 {
             if 0 <= x && x < canvas.width {
                canvas.pixels[y*canvas.width + x] = color
             }
@@ -60,12 +68,6 @@ fn kaku_fill_circle(canvas *Kaku_Canvas, cx int, cy int, r int, color Kaku_Color
          }
       }
    }
-}
-
-fn kaku_swap_int(a *int, b *int) {
-   let t = *a
-   *a = *b
-   *b = t
 }
 
 fn kaku_draw_line(canvas *Kaku_Canvas, x1 int, y1 int, x2 int, y2 int, color Kaku_Color) {
