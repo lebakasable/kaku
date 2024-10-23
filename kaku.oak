@@ -10,6 +10,7 @@ fn kaku_color_new(r int, g int, b int) Kaku_Color {
    color.r = (r&255) as char
    color.g = (g&255) as char
    color.b = (b&255) as char
+   color.a = 255 as char
    return color
 }
 
@@ -19,19 +20,17 @@ fn kaku_color_with_alpha(color Kaku_Color, a int) Kaku_Color {
    return color
 }
 
-fn kaku_mix_colors(c1 Kaku_Color, c2 Kaku_Color) Kaku_Color {
-   let color Kaku_Color
-   color.r = c1.r + (c2.r - c1.r)*c2.a/255 as char
-   color.g = c1.g + (c2.g - c1.g)*c2.a/255 as char
-   color.b = c1.b + (c2.b - c1.b)*c2.a/255 as char
-   color.a = c1.a
-   return color
+fn kaku_color_blend(c1 *Kaku_Color, c2 Kaku_Color) {
+   c1.r = c1.r + (c2.r - c1.r)*c2.a/255 as char
+   c1.g = c1.g + (c2.g - c1.g)*c2.a/255 as char
+   c1.b = c1.b + (c2.b - c1.b)*c2.a/255 as char
 }
 
 struct Kaku_Canvas {
    pixels *Kaku_Color
    width int
    height int
+   stride int
 }
 
 fn kaku_canvas_new(pixels *Kaku_Color, width int, height int) Kaku_Canvas {
@@ -39,16 +38,15 @@ fn kaku_canvas_new(pixels *Kaku_Color, width int, height int) Kaku_Canvas {
    canvas.pixels = pixels
    canvas.width = width
    canvas.height = height
+   canvas.stride = width
    return canvas
 }
 
-fn kaku_fill(canvas *Kaku_Canvas, color Kaku_Color) {
-   for let i = 0, i < canvas.width*canvas.height, i += 1 {
-      canvas.pixels[i] = color
-   }
+fn kaku_canvas_at(canvas *Kaku_Canvas, x int, y int) *Kaku_Color {
+   return &canvas.pixels[y*canvas.stride + x]
 }
 
-fn kaku_swap_int(a *int, b *int) {
+fn kaku_swap_ints(a *int, b *int) {
    let t = *a
    *a = *b
    *b = t
@@ -59,9 +57,9 @@ fn kaku_normalize_rect(canvas *Kaku_Canvas, x int, y int, w int, h int, x1 *int,
    *y1 = y
 
    *x2 = *x1 + sign(w)*(abs(w) - 1)
-   if *x1 > *x2 { kaku_swap_int(x1, x2) }
+   if *x1 > *x2 { kaku_swap_ints(x1, x2) }
    *y2 = *y1 + sign(h)*(abs(h) - 1)
-   if *y1 > *y2 { kaku_swap_int(y1, y2) }
+   if *y1 > *y2 { kaku_swap_ints(y1, y2) }
 
    if *x1 >= canvas.width { return false }
    if *x2 < 0 { return false }
@@ -76,51 +74,57 @@ fn kaku_normalize_rect(canvas *Kaku_Canvas, x int, y int, w int, h int, x1 *int,
    return true
 }
 
-fn kaku_fill_rect(canvas *Kaku_Canvas, x int, y int, w int, h int, color Kaku_Color) {
-   let x1 int let y1 int let x2 int let y2 int
-   if !kaku_normalize_rect(canvas, x, y, w, h, &x1, &y1, &x2, &y2) {
-      return
-   }
-
-   for let y = y1, y <= y2, y += 1 {
-      for let x = x1, x <= x2, x += 1 {
-         canvas.pixels[y*canvas.width + x] = kaku_mix_colors(canvas.pixels[y*canvas.width + x], color)
+fn kaku_fill(canvas *Kaku_Canvas, color Kaku_Color) {
+   for let y = 0, y < canvas.height, y += 1 {
+      for let x = 0, x < canvas.width, x += 1 {
+         *kaku_canvas_at(canvas, x, y) = color
       }
    }
 }
 
-fn kaku_fill_circle(canvas *Kaku_Canvas, cx int, cy int, r int, color Kaku_Color) {
+fn kaku_rect(canvas *Kaku_Canvas, x int, y int, w int, h int, color Kaku_Color) {
+   let x1 int let y1 int let x2 int let y2 int
+   if !kaku_normalize_rect(canvas, x, y, w, h, &x1, &y1, &x2, &y2) {
+      return
+   }
+   for let y = y1, y <= y2, y += 1 {
+      for let x = x1, x <= x2, x += 1 {
+         kaku_color_blend(kaku_canvas_at(canvas, x, y), color)
+      }
+   }
+}
+
+fn kaku_circle(canvas *Kaku_Canvas, cx int, cy int, r int, color Kaku_Color) {
    let x1 int let y1 int let x2 int let y2 int
    let r1 = r + sign(r)
    if !kaku_normalize_rect(canvas, cx - r1, cy - r1, 2*r1, 2*r1, &x1, &y1, &x2, &y2) {
       return
    }
-
    for let y = y1, y <= y2, y += 1 {
       for let x = x1, x <= x2, x += 1 {
          let dx = x - cx
          let dy = y - cy
          if dx*dx + dy*dy <= r*r {
-            canvas.pixels[y*canvas.width + x] = kaku_mix_colors(canvas.pixels[y*canvas.width + x], color)
+            kaku_color_blend(kaku_canvas_at(canvas, x, y), color)
          }
       }
    }
 }
 
-fn kaku_draw_line(canvas *Kaku_Canvas, x1 int, y1 int, x2 int, y2 int, color Kaku_Color) {
+fn kaku_line(canvas *Kaku_Canvas, x1 int, y1 int, x2 int, y2 int, color Kaku_Color) {
    let dx = x2 - x1
    let dy = y2 - y1
    if dx != 0 {
       let c = y1 - dy*x1/dx
-      if x1 > x2 { kaku_swap_int(&x1, &x2) }
+      if x1 > x2 { kaku_swap_ints(&x1, &x2) }
       for let x = x1, x <= x2, x += 1 {
          if 0 <= x && x < canvas.width {
             let y1 = dy*x/dx + c
             let y2 = dy*(x + 1)/dx + c
-            if y1 > y2 { kaku_swap_int(&y1, &y2) }
+            if y1 > y2 { kaku_swap_ints(&y1, &y2) }
             for let y = y1, y <= y2, y += 1 {
                if 0 <= y && y < canvas.height {
-                  canvas.pixels[y*canvas.width + x] = kaku_mix_colors(canvas.pixels[y*canvas.width + x], color)
+                  kaku_color_blend(kaku_canvas_at(canvas, x, y), color)
                }
             }
          }
@@ -128,30 +132,29 @@ fn kaku_draw_line(canvas *Kaku_Canvas, x1 int, y1 int, x2 int, y2 int, color Kak
    } else {
       let x = x1
       if 0 <= x && x < canvas.width {
-         if y1 > y2 { kaku_swap_int(&y1, &y2) }
+         if y1 > y2 { kaku_swap_ints(&y1, &y2) }
          for let y = y1, y <= y2, y += 1 {
             if 0 <= y && y < canvas.height {
-               canvas.pixels[y*canvas.width + x] = kaku_mix_colors(canvas.pixels[y*canvas.width + x], color)
+               kaku_color_blend(kaku_canvas_at(canvas, x, y), color)
             }
          }
       }
    }
 }
 
-fn kaku_fill_triangle(canvas *Kaku_Canvas, x1 int, y1 int, x2 int, y2 int, x3 int, y3 int, color Kaku_Color) {
+fn kaku_triangle(canvas *Kaku_Canvas, x1 int, y1 int, x2 int, y2 int, x3 int, y3 int, color Kaku_Color) {
    if y1 > y2 {
-      kaku_swap_int(&x1, &x2)
-      kaku_swap_int(&y1, &y2)
+      kaku_swap_ints(&x1, &x2)
+      kaku_swap_ints(&y1, &y2)
    }
    if y2 > y3 {
-      kaku_swap_int(&x2, &x3)
-      kaku_swap_int(&y2, &y3)
+      kaku_swap_ints(&x2, &x3)
+      kaku_swap_ints(&y2, &y3)
    }
    if y1 > y2 {
-      kaku_swap_int(&x1, &x2)
-      kaku_swap_int(&y1, &y2)
+      kaku_swap_ints(&x1, &x2)
+      kaku_swap_ints(&y1, &y2)
    }
-
    let dx12 = x2 - x1
    let dy12 = y2 - y1
    let dx13 = x3 - x1
@@ -161,10 +164,10 @@ fn kaku_fill_triangle(canvas *Kaku_Canvas, x1 int, y1 int, x2 int, y2 int, x3 in
          let s1 = x1 let s2 = x1
          if dy12 != 0 { s1 += (y - y1)*dx12/dy12 }
          if dy13 != 0 { s2 += (y - y1)*dx13/dy13 }
-         if s1 > s2 { kaku_swap_int(&s1, &s2) }
+         if s1 > s2 { kaku_swap_ints(&s1, &s2) }
          for let x = s1, x <= s2, x += 1 {
             if 0 <= x && x < canvas.width {
-               canvas.pixels[y*canvas.width + x] = kaku_mix_colors(canvas.pixels[y*canvas.width + x], color)
+               kaku_color_blend(kaku_canvas_at(canvas, x, y), color)
             }
          }
       }
@@ -179,10 +182,10 @@ fn kaku_fill_triangle(canvas *Kaku_Canvas, x1 int, y1 int, x2 int, y2 int, x3 in
          let s1 = x3 let s2 = x3
          if dy32 != 0 { s1 += (y - y3)*dx32/dy32 }
          if dy31 != 0 { s2 += (y - y3)*dx31/dy31 }
-         if s1 > s2 { kaku_swap_int(&s1, &s2) }
+         if s1 > s2 { kaku_swap_ints(&s1, &s2) }
          for let x = s1, x <= s2, x += 1 {
             if 0 <= x && x < canvas.width {
-               canvas.pixels[y*canvas.width + x] = kaku_mix_colors(canvas.pixels[y*canvas.width + x], color)
+               kaku_color_blend(kaku_canvas_at(canvas, x, y), color)
             }
          }
       }

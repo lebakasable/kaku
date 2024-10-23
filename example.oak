@@ -40,7 +40,7 @@ fn checker_example() {
          if (x + y)%2 == 0 {
             color = palette[COLOR_WHITE]
          }
-         kaku_fill_rect(&canvas, x*CELL_WIDTH, y*CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT, color)
+         kaku_rect(&canvas, x*CELL_WIDTH, y*CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT, color)
       }
    }
 
@@ -62,7 +62,7 @@ fn circles_example() {
          let radius = min(CELL_WIDTH, CELL_HEIGHT)
          radius = (radius/8)*(1000 - t)/1000 + (radius/2)*t/1000
 
-         kaku_fill_circle(&canvas, x*CELL_WIDTH + CELL_WIDTH/2, y*CELL_HEIGHT + CELL_HEIGHT/2, radius, palette[COLOR_RED])
+         kaku_circle(&canvas, x*CELL_WIDTH + CELL_WIDTH/2, y*CELL_HEIGHT + CELL_HEIGHT/2, radius, palette[COLOR_RED])
       }
    }
 
@@ -75,17 +75,17 @@ fn lines_example() {
    let canvas = kaku_canvas_new(&pixels, WIDTH, HEIGHT)
    kaku_fill(&canvas, palette[COLOR_BLACK])
 
-   kaku_draw_line(&canvas, 0, 0, WIDTH, HEIGHT, palette[COLOR_RED])
-   kaku_draw_line(&canvas, WIDTH, 0, 0, HEIGHT, palette[COLOR_RED])
+   kaku_line(&canvas, 0, 0, WIDTH, HEIGHT, palette[COLOR_RED])
+   kaku_line(&canvas, WIDTH, 0, 0, HEIGHT, palette[COLOR_RED])
 
-   kaku_draw_line(&canvas, WIDTH/2, 0, WIDTH/2, HEIGHT, palette[COLOR_GREEN])
-   kaku_draw_line(&canvas, 0, HEIGHT/2, WIDTH, HEIGHT/2, palette[COLOR_GREEN])
+   kaku_line(&canvas, WIDTH/2, 0, WIDTH/2, HEIGHT, palette[COLOR_GREEN])
+   kaku_line(&canvas, 0, HEIGHT/2, WIDTH, HEIGHT/2, palette[COLOR_GREEN])
 
-   kaku_draw_line(&canvas, WIDTH/4, 0, WIDTH/4*3, HEIGHT, palette[COLOR_BLUE])
-   kaku_draw_line(&canvas, WIDTH/4*3, 0, WIDTH/4, HEIGHT, palette[COLOR_BLUE])
+   kaku_line(&canvas, WIDTH/4, 0, WIDTH/4*3, HEIGHT, palette[COLOR_BLUE])
+   kaku_line(&canvas, WIDTH/4*3, 0, WIDTH/4, HEIGHT, palette[COLOR_BLUE])
 
-   kaku_draw_line(&canvas, 0, HEIGHT/4, WIDTH, HEIGHT/4*3, palette[COLOR_MAUVE])
-   kaku_draw_line(&canvas, 0, HEIGHT/4*3, WIDTH, HEIGHT/4, palette[COLOR_MAUVE])
+   kaku_line(&canvas, 0, HEIGHT/4, WIDTH, HEIGHT/4*3, palette[COLOR_MAUVE])
+   kaku_line(&canvas, 0, HEIGHT/4*3, WIDTH, HEIGHT/4, palette[COLOR_MAUVE])
 
    let file_path = "lines.ppm\0"c
    &stdout << "info: generated '" << str_from_cstr(file_path) << "'\n"
@@ -96,7 +96,7 @@ fn triangle_example() {
    let canvas = kaku_canvas_new(&pixels, WIDTH, HEIGHT)
    kaku_fill(&canvas, palette[COLOR_BLACK])
 
-   kaku_fill_triangle(&canvas, WIDTH/2, HEIGHT/8, WIDTH/8, HEIGHT/2, WIDTH*7/8, HEIGHT*7/8, palette[COLOR_GREEN])
+   kaku_triangle(&canvas, WIDTH/2, HEIGHT/8, WIDTH/8, HEIGHT/2, WIDTH*7/8, HEIGHT*7/8, palette[COLOR_GREEN])
 
    let file_path = "triangle.ppm\0"c
    &stdout << "info: generated '" << str_from_cstr(file_path) << "'\n"
@@ -107,10 +107,10 @@ fn alpha_example() {
    let canvas = kaku_canvas_new(&pixels, WIDTH, HEIGHT)
    kaku_fill(&canvas, palette[COLOR_BLACK])
 
-   kaku_fill_rect(&canvas, 0, 0, WIDTH*3/4, HEIGHT*3/4, palette[COLOR_RED])
-   kaku_fill_rect(&canvas, WIDTH - 1, HEIGHT - 1, -WIDTH*3/4, -HEIGHT*3/4, kaku_color_with_alpha(palette[COLOR_GREEN], 255/2))
-   kaku_fill_circle(&canvas, WIDTH/2, HEIGHT/2, WIDTH/4, kaku_color_with_alpha(palette[COLOR_BLUE], 255/2))
-   kaku_fill_triangle(&canvas, 0, HEIGHT, WIDTH, HEIGHT, WIDTH/2, 0, kaku_color_with_alpha(palette[COLOR_MAUVE], 255/8))
+   kaku_rect(&canvas, 0, 0, WIDTH*3/4, HEIGHT*3/4, palette[COLOR_RED])
+   kaku_rect(&canvas, WIDTH - 1, HEIGHT - 1, -WIDTH*3/4, -HEIGHT*3/4, kaku_color_with_alpha(palette[COLOR_GREEN], 255/2))
+   kaku_circle(&canvas, WIDTH/2, HEIGHT/2, WIDTH/4, kaku_color_with_alpha(palette[COLOR_BLUE], 255/2))
+   kaku_triangle(&canvas, 0, HEIGHT, WIDTH, HEIGHT, WIDTH/2, 0, kaku_color_with_alpha(palette[COLOR_MAUVE], 255/8))
 
    let file_path = "alpha.ppm\0"c
    &stdout << "info: generated '" << str_from_cstr(file_path) << "'\n"
