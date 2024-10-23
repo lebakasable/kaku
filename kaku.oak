@@ -28,6 +28,185 @@ fn kaku_color_blend(c1 *Kaku_Color, c2 Kaku_Color) {
    c1.b = c1.b + (c2.b - c1.b)*c2.a/255 as char
 }
 
+struct Kaku_Font {
+   width int
+   height int
+   glyphs *char
+}
+
+const KAKU_DEFAULT_FONT_HEIGHT = 5
+const KAKU_DEFAULT_FONT_WIDTH = 5
+let kaku_default_font_glyphs [128][KAKU_DEFAULT_FONT_HEIGHT][KAKU_DEFAULT_FONT_WIDTH]char
+let kaku_default_font Kaku_Font
+
+fn kaku_default_font_set_glyph_row(glyph char, row int, value Str) {
+   for let i = 0, i < value.size, i += 1 {
+      kaku_default_font_glyphs[glyph as int][row][i] = value.data[i]
+   }
+}
+
+fn kaku_default_font_init() {
+   kaku_default_font.width = KAKU_DEFAULT_FONT_WIDTH
+   kaku_default_font.height = KAKU_DEFAULT_FONT_HEIGHT
+   kaku_default_font.glyphs = &kaku_default_font_glyphs[0][0][0]
+
+   kaku_default_font_set_glyph_row('a', 0, " ##  ")
+   kaku_default_font_set_glyph_row('a', 1, "#  # ")
+   kaku_default_font_set_glyph_row('a', 2, "#### ")
+   kaku_default_font_set_glyph_row('a', 3, "#  # ")
+   kaku_default_font_set_glyph_row('a', 4, "#  # ")
+
+   kaku_default_font_set_glyph_row('b', 0, "###  ")
+   kaku_default_font_set_glyph_row('b', 1, "#  # ")
+   kaku_default_font_set_glyph_row('b', 2, "###  ")
+   kaku_default_font_set_glyph_row('b', 3, "#  # ")
+   kaku_default_font_set_glyph_row('b', 4, "###  ")
+
+   kaku_default_font_set_glyph_row('c', 0, " ##  ")
+   kaku_default_font_set_glyph_row('c', 1, "#    ")
+   kaku_default_font_set_glyph_row('c', 2, "#    ")
+   kaku_default_font_set_glyph_row('c', 3, "#    ")
+   kaku_default_font_set_glyph_row('c', 4, " ##  ")
+
+   kaku_default_font_set_glyph_row('d', 0, "###  ")
+   kaku_default_font_set_glyph_row('d', 1, "#  # ")
+   kaku_default_font_set_glyph_row('d', 2, "#  # ")
+   kaku_default_font_set_glyph_row('d', 3, "#  # ")
+   kaku_default_font_set_glyph_row('d', 4, "###  ")
+
+   kaku_default_font_set_glyph_row('e', 0, "#### ")
+   kaku_default_font_set_glyph_row('e', 1, "#    ")
+   kaku_default_font_set_glyph_row('e', 2, "###  ")
+   kaku_default_font_set_glyph_row('e', 3, "#    ")
+   kaku_default_font_set_glyph_row('e', 4, "#### ")
+
+   kaku_default_font_set_glyph_row('f', 0, " ##  ")
+   kaku_default_font_set_glyph_row('f', 1, "#  # ")
+   kaku_default_font_set_glyph_row('f', 2, "##   ")
+   kaku_default_font_set_glyph_row('f', 3, "#    ")
+   kaku_default_font_set_glyph_row('f', 4, "#    ")
+
+   kaku_default_font_set_glyph_row('g', 0, " ##  ")
+   kaku_default_font_set_glyph_row('g', 1, "#  # ")
+   kaku_default_font_set_glyph_row('g', 2, " ##  ")
+   kaku_default_font_set_glyph_row('g', 3, "  #  ")
+   kaku_default_font_set_glyph_row('g', 4, "###  ")
+
+   kaku_default_font_set_glyph_row('h', 0, "#  # ")
+   kaku_default_font_set_glyph_row('h', 1, "#  # ")
+   kaku_default_font_set_glyph_row('h', 2, "#### ")
+   kaku_default_font_set_glyph_row('h', 3, "#  # ")
+   kaku_default_font_set_glyph_row('h', 4, "#  # ")
+
+   kaku_default_font_set_glyph_row('i', 0, "###  ")
+   kaku_default_font_set_glyph_row('i', 1, " #   ")
+   kaku_default_font_set_glyph_row('i', 2, " #   ")
+   kaku_default_font_set_glyph_row('i', 3, " #   ")
+   kaku_default_font_set_glyph_row('i', 4, "###  ")
+
+   kaku_default_font_set_glyph_row('j', 0, "  ## ")
+   kaku_default_font_set_glyph_row('j', 1, "   # ")
+   kaku_default_font_set_glyph_row('j', 2, "   # ")
+   kaku_default_font_set_glyph_row('j', 3, "#  # ")
+   kaku_default_font_set_glyph_row('j', 4, " ##  ")
+
+   kaku_default_font_set_glyph_row('k', 0, "#  # ")
+   kaku_default_font_set_glyph_row('k', 1, "# #  ")
+   kaku_default_font_set_glyph_row('k', 2, "##   ")
+   kaku_default_font_set_glyph_row('k', 3, "# #  ")
+   kaku_default_font_set_glyph_row('k', 4, "#  # ")
+
+   kaku_default_font_set_glyph_row('l', 0, "#    ")
+   kaku_default_font_set_glyph_row('l', 1, "#    ")
+   kaku_default_font_set_glyph_row('l', 2, "#    ")
+   kaku_default_font_set_glyph_row('l', 3, "#    ")
+   kaku_default_font_set_glyph_row('l', 4, "#### ")
+
+   kaku_default_font_set_glyph_row('m', 0, "#  # ")
+   kaku_default_font_set_glyph_row('m', 1, "# ## ")
+   kaku_default_font_set_glyph_row('m', 2, "## # ")
+   kaku_default_font_set_glyph_row('m', 3, "#  # ")
+   kaku_default_font_set_glyph_row('m', 4, "#  # ")
+
+   kaku_default_font_set_glyph_row('n', 0, "#  # ")
+   kaku_default_font_set_glyph_row('n', 1, "## # ")
+   kaku_default_font_set_glyph_row('n', 2, "# ## ")
+   kaku_default_font_set_glyph_row('n', 3, "#  # ")
+   kaku_default_font_set_glyph_row('n', 4, "#  # ")
+
+   kaku_default_font_set_glyph_row('o', 0, " ##  ")
+   kaku_default_font_set_glyph_row('o', 1, "#  # ")
+   kaku_default_font_set_glyph_row('o', 2, "#  # ")
+   kaku_default_font_set_glyph_row('o', 3, "#  # ")
+   kaku_default_font_set_glyph_row('o', 4, " ##  ")
+
+   kaku_default_font_set_glyph_row('p', 0, "###  ")
+   kaku_default_font_set_glyph_row('p', 1, "#  # ")
+   kaku_default_font_set_glyph_row('p', 2, "###  ")
+   kaku_default_font_set_glyph_row('p', 3, "#    ")
+   kaku_default_font_set_glyph_row('p', 4, "#    ")
+
+   kaku_default_font_set_glyph_row('q', 0, " ##  ")
+   kaku_default_font_set_glyph_row('q', 1, "#  # ")
+   kaku_default_font_set_glyph_row('q', 2, "#  # ")
+   kaku_default_font_set_glyph_row('q', 3, " ##  ")
+   kaku_default_font_set_glyph_row('q', 4, "   # ")
+
+   kaku_default_font_set_glyph_row('r', 0, "###  ")
+   kaku_default_font_set_glyph_row('r', 1, "#  # ")
+   kaku_default_font_set_glyph_row('r', 2, "###  ")
+   kaku_default_font_set_glyph_row('r', 3, "# #  ")
+   kaku_default_font_set_glyph_row('r', 4, "#  # ")
+
+   kaku_default_font_set_glyph_row('s', 0, " ##  ")
+   kaku_default_font_set_glyph_row('s', 1, "#    ")
+   kaku_default_font_set_glyph_row('s', 2, " ##  ")
+   kaku_default_font_set_glyph_row('s', 3, "   # ")
+   kaku_default_font_set_glyph_row('s', 4, "###  ")
+
+   kaku_default_font_set_glyph_row('t', 0, "#### ")
+   kaku_default_font_set_glyph_row('t', 1, " #   ")
+   kaku_default_font_set_glyph_row('t', 2, " #   ")
+   kaku_default_font_set_glyph_row('t', 3, " #   ")
+   kaku_default_font_set_glyph_row('t', 4, " #   ")
+
+   kaku_default_font_set_glyph_row('u', 0, "#  # ")
+   kaku_default_font_set_glyph_row('u', 1, "#  # ")
+   kaku_default_font_set_glyph_row('u', 2, "#  # ")
+   kaku_default_font_set_glyph_row('u', 3, "#  # ")
+   kaku_default_font_set_glyph_row('u', 4, " ##  ")
+
+   kaku_default_font_set_glyph_row('v', 0, "#  # ")
+   kaku_default_font_set_glyph_row('v', 1, "#  # ")
+   kaku_default_font_set_glyph_row('v', 2, "#  # ")
+   kaku_default_font_set_glyph_row('v', 3, " # # ")
+   kaku_default_font_set_glyph_row('v', 4, "  #  ")
+
+   kaku_default_font_set_glyph_row('w', 0, "#  # ")
+   kaku_default_font_set_glyph_row('w', 1, "#  # ")
+   kaku_default_font_set_glyph_row('w', 2, "#### ")
+   kaku_default_font_set_glyph_row('w', 3, "#### ")
+   kaku_default_font_set_glyph_row('w', 4, " ##  ")
+
+   kaku_default_font_set_glyph_row('x', 0, "#  # ")
+   kaku_default_font_set_glyph_row('x', 1, " # # ")
+   kaku_default_font_set_glyph_row('x', 2, "  #  ")
+   kaku_default_font_set_glyph_row('x', 3, " # # ")
+   kaku_default_font_set_glyph_row('x', 4, "#  # ")
+
+   kaku_default_font_set_glyph_row('y', 0, "#  # ")
+   kaku_default_font_set_glyph_row('y', 1, " # # ")
+   kaku_default_font_set_glyph_row('y', 2, "  #  ")
+   kaku_default_font_set_glyph_row('y', 3, "  #  ")
+   kaku_default_font_set_glyph_row('y', 4, "###  ")
+
+   kaku_default_font_set_glyph_row('z', 0, "#### ")
+   kaku_default_font_set_glyph_row('z', 1, "   # ")
+   kaku_default_font_set_glyph_row('z', 2, "  #  ")
+   kaku_default_font_set_glyph_row('z', 3, " #   ")
+   kaku_default_font_set_glyph_row('z', 4, "#### ")
+}
+
 struct Kaku_Canvas {
    pixels *Kaku_Color
    width int
@@ -194,6 +373,25 @@ fn kaku_triangle(canvas *Kaku_Canvas, x1 int, y1 int, x2 int, y2 int, x3 int, y3
          for let x = s1, x <= s2, x += 1 {
             if 0 <= x && x < canvas.width {
                kaku_color_blend(kaku_canvas_at(canvas, x, y), color)
+            }
+         }
+      }
+   }
+}
+
+fn kaku_text(canvas *Kaku_Canvas, text Str, x int, y int, font Kaku_Font, glyph_size int, color Kaku_Color) {
+   for let i = 0, i < text.size, i += 1 {
+      let gx = x + i*font.width*glyph_size
+      let gy = y
+      let glyph = &font.glyphs[text.data[i] as int*font.width*font.height]
+      for let dy = 0, dy < font.height, dy += 1 {
+         for let dx = 0, dx < font.width, dx += 1 {
+            let px = gx + dx*glyph_size
+            let py = gy + dy*glyph_size
+            if 0 <= px && px < canvas.width && 0 <= py && py < canvas.height {
+               if glyph[dy*font.width + dx] == '#' {
+                  kaku_rect(canvas, px, py, glyph_size, glyph_size, color)
+               }
             }
          }
       }

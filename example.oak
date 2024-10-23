@@ -1,10 +1,10 @@
 use std.io
 use kaku
 
-const WIDTH = 512
-const HEIGHT = 512
-const COLS = 8
-const ROWS = 8
+const WIDTH = 800
+const HEIGHT = 600
+const COLS = 8*2
+const ROWS = 6*2
 const CELL_WIDTH = WIDTH/COLS
 const CELL_HEIGHT = HEIGHT/ROWS
 
@@ -117,6 +117,18 @@ fn alpha_example() {
    kaku_save_to_ppm(&canvas, file_path)
 }
 
+fn text_example() {
+   let canvas = kaku_canvas_new(&pixels, WIDTH, HEIGHT)
+   kaku_fill(&canvas, palette[COLOR_BLACK])
+
+   kaku_default_font_init()
+   kaku_text(&canvas, "the quick brown fox jumps over the lazy dog", 0, 0, kaku_default_font, 3, palette[COLOR_WHITE])
+
+   let file_path = "text.ppm\0"c
+   &stdout << "info: generated '" << str_from_cstr(file_path) << "'\n"
+   kaku_save_to_ppm(&canvas, file_path)
+}
+
 fn main() {
    init_palette()
    checker_example()
@@ -124,4 +136,5 @@ fn main() {
    lines_example()
    triangle_example()
    alpha_example()
+   text_example()
 }
