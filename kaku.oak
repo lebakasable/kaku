@@ -55,9 +55,18 @@ fn kaku_fill_rect(canvas *Kaku_Canvas, x1 int, y1 int, w int, h int, color Kaku_
 }
 
 fn kaku_fill_circle(canvas *Kaku_Canvas, cx int, cy int, r int, color Kaku_Color) {
-   for let y = cy - r, y <= cy + r, y += 1 {
+   if r == 0 {
+      return
+   }
+   let x1 = cx - r
+   let x2 = cx + r
+   if x1 > x2 { kaku_swap_int(&x1, &x2) }
+   let y1 = cy - r
+   let y2 = cy + r
+   if y1 > y2 { kaku_swap_int(&y1, &y2) }
+   for let y = y1, y <= y2, y += 1 {
       if 0 <= y && y < canvas.height {
-         for let x = cx - r, x <= cx + r, x += 1 {
+         for let x = x1, x <= x2, x += 1 {
             if 0 <= x && x < canvas.width {
                let dx = x - cx
                let dy = y - cy
