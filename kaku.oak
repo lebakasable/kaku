@@ -180,7 +180,7 @@ fn kaku_save_to_ppm(canvas *Kaku_Canvas, file_path *char) {
       exit(1)
    }
 
-   &file << "P6\n" << canvas.width << " " << canvas.height << " 255\n"
+   &file << "P6\n" << canvas.width << "\n" << canvas.height << "\n255\n"
    for let i = 0, i < canvas.width*canvas.height, i += 1 {
       &file << canvas.pixels[i].r << canvas.pixels[i].g << canvas.pixels[i].b
    }
