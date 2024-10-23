@@ -1,6 +1,6 @@
 # kaku
 
-A simple graphics library for Oak.
+A simple graphics library written in Oak.
 
 ## Quick Start
 
