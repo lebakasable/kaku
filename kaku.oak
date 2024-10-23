@@ -38,42 +38,54 @@ fn kaku_swap_int(a *int, b *int) {
    *b = t
 }
 
-fn kaku_fill_rect(canvas *Kaku_Canvas, x1 int, y1 int, w int, h int, color Kaku_Color) {
-   let x2 = x1 + sign(w)*(abs(w) - 1)
-   if x1 > x2 { kaku_swap_int(&x1, &x2) }
-   let y2 = y1 + sign(h)*(abs(h) - 1)
-   if y1 > y2 { kaku_swap_int(&y1, &y2) }
+fn kaku_normalize_rect(canvas *Kaku_Canvas, x int, y int, w int, h int, x1 *int, y1 *int, x2 *int, y2 *int) bool {
+   *x1 = x
+   *y1 = y
+
+   *x2 = *x1 + sign(w)*(abs(w) - 1)
+   if *x1 > *x2 { kaku_swap_int(x1, x2) }
+   *y2 = *y1 + sign(h)*(abs(h) - 1)
+   if *y1 > *y2 { kaku_swap_int(y1, y2) }
+
+   if *x1 >= canvas.width { return false }
+   if *x2 < 0 { return false }
+   if *y1 >= canvas.height { return false }
+   if *y2 < 0 { return false }
+
+   if *x1 < 0 { *x1 = 0 }
+   if *x2 >= canvas.width { *x2 = canvas.width - 1 }
+   if *y1 < 0 { *y1 = 0 }
+   if *y2 >= canvas.height { *y2 = canvas.height - 1 }
+
+   return true
+}
+
+fn kaku_fill_rect(canvas *Kaku_Canvas, x int, y int, w int, h int, color Kaku_Color) {
+   let x1 int let y1 int let x2 int let y2 int
+   if !kaku_normalize_rect(canvas, x, y, w, h, &x1, &y1, &x2, &y2) {
+      return
+   }
+
    for let y = y1, y <= y2, y += 1 {
-      if 0 <= y && y < canvas.height {
-         for let x = x1, x <= x2, x += 1 {
-            if 0 <= x && x < canvas.width {
-               canvas.pixels[y*canvas.width + x] = color
-            }
-         }
+      for let x = x1, x <= x2, x += 1 {
+         canvas.pixels[y*canvas.width + x] = color
       }
    }
 }
 
 fn kaku_fill_circle(canvas *Kaku_Canvas, cx int, cy int, r int, color Kaku_Color) {
-   if r == 0 {
+   let x1 int let y1 int let x2 int let y2 int
+   let r1 = r + sign(r)
+   if !kaku_normalize_rect(canvas, cx - r1, cy - r1, 2*r1, 2*r1, &x1, &y1, &x2, &y2) {
       return
    }
-   let x1 = cx - r
-   let x2 = cx + r
-   if x1 > x2 { kaku_swap_int(&x1, &x2) }
-   let y1 = cy - r
-   let y2 = cy + r
-   if y1 > y2 { kaku_swap_int(&y1, &y2) }
+
    for let y = y1, y <= y2, y += 1 {
-      if 0 <= y && y < canvas.height {
-         for let x = x1, x <= x2, x += 1 {
-            if 0 <= x && x < canvas.width {
-               let dx = x - cx
-               let dy = y - cy
-               if dx*dx + dy*dy <= r*r {
-                  canvas.pixels[y*canvas.width + x] = color
-               }
-            }
+      for let x = x1, x <= x2, x += 1 {
+         let dx = x - cx
+         let dy = y - cy
+         if dx*dx + dy*dy <= r*r {
+            canvas.pixels[y*canvas.width + x] = color
          }
       }
    }
