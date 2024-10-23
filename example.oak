@@ -44,7 +44,9 @@ fn checker_example() {
       }
    }
 
-   kaku_save_to_ppm(&canvas, "checker.ppm\0"c)
+   let file_path = "checker.ppm\0"c
+   &stdout << "info: generated '" << str_from_cstr(file_path) << "'\n"
+   kaku_save_to_ppm(&canvas, file_path)
 }
 
 fn circles_example() {
@@ -64,7 +66,9 @@ fn circles_example() {
       }
    }
 
-   kaku_save_to_ppm(&canvas, "circles.ppm\0"c)
+   let file_path = "circles.ppm\0"c
+   &stdout << "info: generated '" << str_from_cstr(file_path) << "'\n"
+   kaku_save_to_ppm(&canvas, file_path)
 }
 
 fn lines_example() {
@@ -83,7 +87,9 @@ fn lines_example() {
    kaku_draw_line(&canvas, 0, HEIGHT/4, WIDTH, HEIGHT/4*3, palette[COLOR_MAUVE])
    kaku_draw_line(&canvas, 0, HEIGHT/4*3, WIDTH, HEIGHT/4, palette[COLOR_MAUVE])
 
-   kaku_save_to_ppm(&canvas, "lines.ppm\0"c)
+   let file_path = "lines.ppm\0"c
+   &stdout << "info: generated '" << str_from_cstr(file_path) << "'\n"
+   kaku_save_to_ppm(&canvas, file_path)
 }
 
 fn main() {
