@@ -92,9 +92,21 @@ fn lines_example() {
    kaku_save_to_ppm(&canvas, file_path)
 }
 
+fn triangle_example() {
+   let canvas = kaku_canvas_new(&pixels, WIDTH, HEIGHT)
+   kaku_fill(&canvas, palette[COLOR_BLACK])
+
+   kaku_fill_triangle(&canvas, WIDTH/2, HEIGHT/8, WIDTH/8, HEIGHT/2, WIDTH*7/8, HEIGHT*7/8, palette[COLOR_GREEN])
+
+   let file_path = "triangle.ppm\0"c
+   &stdout << "info: generated '" << str_from_cstr(file_path) << "'\n"
+   kaku_save_to_ppm(&canvas, file_path)
+}
+
 fn main() {
    init_palette()
    checker_example()
    circles_example()
    lines_example()
+   triangle_example()
 }
