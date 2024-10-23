@@ -1,0 +1,94 @@
+use std.io
+use kaku
+
+const WIDTH = 800
+const HEIGHT = 600
+const COLS = 8*2
+const ROWS = 6*2
+const CELL_WIDTH = WIDTH/COLS
+const CELL_HEIGHT = HEIGHT/ROWS
+
+const (
+   COLOR_MAUVE
+   COLOR_RED
+   COLOR_GREEN
+   COLOR_BLUE
+   COLOR_WHITE
+   COLOR_BLACK
+   COUNT_COLORS
+)
+
+let palette [COUNT_COLORS]Kaku_Color
+fn init_palette() {
+   palette[COLOR_MAUVE] = kaku_color_new(203, 166, 247)
+   palette[COLOR_RED] = kaku_color_new(243, 139, 168)
+   palette[COLOR_GREEN] = kaku_color_new(166, 227, 161)
+   palette[COLOR_BLUE] = kaku_color_new(137, 180, 250)
+   palette[COLOR_WHITE] = kaku_color_new(205, 214, 244)
+   palette[COLOR_BLACK] = kaku_color_new(30, 30, 46)
+}
+
+let pixels [HEIGHT*WIDTH]Kaku_Color
+
+fn checker_example() {
+   let canvas = kaku_canvas_new(&pixels, WIDTH, HEIGHT)
+   kaku_fill(&canvas, palette[COLOR_BLACK])
+
+   for let y = 0, y < ROWS, y += 1 {
+      for let x = 0, x < COLS, x += 1 {
+         let color = palette[COLOR_BLACK]
+         if (x + y)%2 == 0 {
+            color = palette[COLOR_WHITE]
+         }
+         kaku_fill_rect(&canvas, x*CELL_WIDTH, y*CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT, color)
+      }
+   }
+
+   kaku_save_to_ppm(&canvas, "checker.ppm\0"c)
+}
+
+fn circles_example() {
+   let canvas = kaku_canvas_new(&pixels, WIDTH, HEIGHT)
+   kaku_fill(&canvas, palette[COLOR_BLACK])
+
+   for let y = 0, y < ROWS, y += 1 {
+      for let x = 0, x < COLS, x += 1 {
+         let u = (x*1000)/COLS
+         let v = (y*1000)/ROWS
+         let t = (u + v)/2
+
+         let radius = min(CELL_WIDTH, CELL_HEIGHT)
+         radius = (radius/8)*(1000 - t)/1000 + (radius/2)*t/1000
+
+         kaku_fill_circle(&canvas, x*CELL_WIDTH + CELL_WIDTH/2, y*CELL_HEIGHT + CELL_HEIGHT/2, radius, palette[COLOR_RED])
+      }
+   }
+
+   kaku_save_to_ppm(&canvas, "circles.ppm\0"c)
+}
+
+fn lines_example() {
+   let canvas = kaku_canvas_new(&pixels, WIDTH, HEIGHT)
+   kaku_fill(&canvas, palette[COLOR_BLACK])
+
+   kaku_draw_line(&canvas, 0, 0, WIDTH, HEIGHT, palette[COLOR_RED])
+   kaku_draw_line(&canvas, WIDTH, 0, 0, HEIGHT, palette[COLOR_RED])
+
+   kaku_draw_line(&canvas, WIDTH/2, 0, WIDTH/2, HEIGHT, palette[COLOR_GREEN])
+   kaku_draw_line(&canvas, 0, HEIGHT/2, WIDTH, HEIGHT/2, palette[COLOR_GREEN])
+
+   kaku_draw_line(&canvas, WIDTH/4, 0, WIDTH/4*3, HEIGHT, palette[COLOR_BLUE])
+   kaku_draw_line(&canvas, WIDTH/4*3, 0, WIDTH/4, HEIGHT, palette[COLOR_BLUE])
+
+   kaku_draw_line(&canvas, 0, HEIGHT/4, WIDTH, HEIGHT/4*3, palette[COLOR_MAUVE])
+   kaku_draw_line(&canvas, 0, HEIGHT/4*3, WIDTH, HEIGHT/4, palette[COLOR_MAUVE])
+
+   kaku_save_to_ppm(&canvas, "lines.ppm\0"c)
+}
+
+fn main() {
+   init_palette()
+   checker_example()
+   circles_example()
+   lines_example()
+}

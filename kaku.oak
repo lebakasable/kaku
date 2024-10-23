@@ -1,0 +1,114 @@
+struct Kaku_Color {
+   r char
+   g char
+   b char
+}
+
+fn kaku_color_new(r int, g int, b int) Kaku_Color {
+   let color Kaku_Color
+   color.r = (r&255) as char
+   color.g = (g&255) as char
+   color.b = (b&255) as char
+   return color
+}
+
+struct Kaku_Canvas {
+   pixels *Kaku_Color
+   width int
+   height int
+}
+
+fn kaku_canvas_new(pixels *Kaku_Color, width int, height int) Kaku_Canvas {
+   let canvas Kaku_Canvas
+   canvas.pixels = pixels
+   canvas.width = width
+   canvas.height = height
+   return canvas
+}
+
+fn kaku_fill(canvas *Kaku_Canvas, color Kaku_Color) {
+   for let i = 0, i < canvas.width*canvas.height, i += 1 {
+      canvas.pixels[i] = color
+   }
+}
+
+fn kaku_fill_rect(canvas *Kaku_Canvas, x int, y int, w int, h int, color Kaku_Color) {
+   for let dy = 0, dy < h, dy += 1 {
+      let y = y + dy
+      if 0 <= y && y < canvas.height {
+         for let dx = 0, dx < w, dx += 1 {
+            let x = x + dx
+            if 0 <= x && x < canvas.width {
+               canvas.pixels[y*canvas.width + x] = color
+            }
+         }
+      }
+   }
+}
+
+fn kaku_fill_circle(canvas *Kaku_Canvas, cx int, cy int, r int, color Kaku_Color) {
+   for let y = cy - r, y <= cy + r, y += 1 {
+      if 0 <= y && y < canvas.height {
+         for let x = cx - r, x <= cx + r, x += 1 {
+            if 0 <= x && x < canvas.width {
+               let dx = x - cx
+               let dy = y - cy
+               if dx*dx + dy*dy <= r*r {
+                  canvas.pixels[y*canvas.width + x] = color
+               }
+            }
+         }
+      }
+   }
+}
+
+fn kaku_swap_int(a *int, b *int) {
+   let t = *a
+   *a = *b
+   *b = t
+}
+
+fn kaku_draw_line(canvas *Kaku_Canvas, x1 int, y1 int, x2 int, y2 int, color Kaku_Color) {
+   let dx = x2 - x1
+   let dy = y2 - y1
+   if dx != 0 {
+      let c = y1 - dy*x1/dx
+      if x1 > x2 { kaku_swap_int(&x1, &x2) }
+      for let x = x1, x <= x2, x += 1 {
+         if 0 <= x && x < canvas.width {
+            let y1 = dy*x/dx + c
+            let y2 = dy*(x + 1)/dx + c
+            if y1 > y2 { kaku_swap_int(&y1, &y2) }
+            for let y = y1, y <= y2, y += 1 {
+               if 0 <= y && y < canvas.height {
+                  canvas.pixels[y*canvas.width + x] = color
+               }
+            }
+         }
+      }
+   } else {
+      let x = x1
+      if 0 <= x && x < canvas.width {
+         if y1 > y2 { kaku_swap_int(&y1, &y2) }
+         for let y = y1, y <= y2, y += 1 {
+            if 0 <= y && y < canvas.height {
+               canvas.pixels[y*canvas.width + x] = color
+            }
+         }
+      }
+   }
+}
+
+fn kaku_save_to_ppm(canvas *Kaku_Canvas, file_path *char) {
+   let file File
+   if !file_create(&file, file_path) {
+      &stderr << "error: could not create file '" << str_from_cstr(file_path) << "'\n"
+      exit(1)
+   }
+
+   &file << "P6\n" << canvas.width << " " << canvas.height << " 255\n"
+   for let i = 0, i < canvas.width*canvas.height, i += 1 {
+      &file << canvas.pixels[i].r << canvas.pixels[i].g << canvas.pixels[i].b
+   }
+   file_close(&file)
+}
